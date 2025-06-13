@@ -1,18 +1,24 @@
 package com.example.springbootbackend.controller;
 
 import com.example.springbootbackend.bean.AuthenticationBean;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.RequestHeader;
+import com.example.springbootbackend.model.User;
+import com.example.springbootbackend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @CrossOrigin(origins = "http://localhost:4200")
 @RestController
 @RequestMapping("/api/v1")
 public class BasicAuthController {
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping(path = "/basicauth")
     public ResponseEntity<AuthenticationBean> basicauth(@RequestHeader("Authorization") String authHeader) {
@@ -25,10 +31,9 @@ public class BasicAuthController {
             String username = values[0];
             String password = values[1];
 
-            // For demo purposes, hardcoding credentials
-            // In production, validate against a user database or service
-            if ("admin".equals(username) && "admin".equals(password) || 
-                "employee".equals(username) && "employee".equals(password)) {
+            // Validate against H2 database
+            User user = userService.validateUser(username, password);
+            if (user != null) {
                 return new ResponseEntity<>(new AuthenticationBean("You are authenticated"), HttpStatus.OK);
             }
         }
